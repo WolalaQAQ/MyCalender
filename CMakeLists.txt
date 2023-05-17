@@ -15,9 +15,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-include_directories(./calender_dialog)
-add_subdirectory(calender_dialog)
-aux_source_directory(./calender_dialog CALENDER_SRCS)
+SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
+
+include_directories(main_window)
+add_subdirectory(main_window)
+aux_source_directory(main_window MAIN_WINDOW_SRCS)
 
 include_directories(./reminder_dialog)
 add_subdirectory(reminder_dialog)
@@ -25,7 +27,7 @@ aux_source_directory(./reminder_dialog REMINDER_SRCS)
 
 set(PROJECT_SOURCES
         main.cpp
-        ${CALENDER_SRCS}
+        ${MAIN_WINDOW_SRCS}
         ${REMINDER_SRCS}
 )
 
