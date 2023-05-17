@@ -12,8 +12,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Positioning Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Positioning Network)
 
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 
@@ -25,10 +25,15 @@ include_directories(./reminder_dialog)
 add_subdirectory(reminder_dialog)
 aux_source_directory(./reminder_dialog REMINDER_SRCS)
 
+include_directories(./weather)
+add_subdirectory(weather)
+aux_source_directory(./weather WEATHER_SRCS)
+
 set(PROJECT_SOURCES
         main.cpp
         ${MAIN_WINDOW_SRCS}
         ${REMINDER_SRCS}
+        ${WEATHER_SRCS}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -54,7 +59,14 @@ else()
     endif()
 endif()
 
-target_link_libraries(MyCalender PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(MyCalender
+        PRIVATE
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Positioning
+        Qt${QT_VERSION_MAJOR}::Network
+        )
 
 set_target_properties(MyCalender PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

@@ -11,6 +11,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QGeoPositionInfo>
+#include <QGeoPositionInfoSource>
 
 #include "reminder.h"
 
@@ -37,6 +39,7 @@ public slots:
     void openReminderDialog();
     void showReminder(int row, int column);
     void editReminder(QListWidgetItem *item);
+    void searchReminders(const QString &keyword);
 
 private:
     void refreshMainWindow(int year, int month);

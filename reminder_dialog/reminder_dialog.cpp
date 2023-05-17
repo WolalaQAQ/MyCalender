@@ -18,16 +18,16 @@ ReminderDialog::~ReminderDialog() {
     delete ui;
 }
 
-QDate ReminderDialog::getDate() const {
-    return ui->dateTimeEdit->date();
+QDateTime ReminderDialog::getDate() const {
+    return ui->dateTimeEdit->dateTime();
 }
 
 QString ReminderDialog::getContent() const {
     return ui->lineEdit->text();
 }
 
-void ReminderDialog::setDate(const QDate &date) {
-    ui->dateTimeEdit->setDate(date);
+void ReminderDialog::setDate(const QDateTime &date) {
+    ui->dateTimeEdit->setDateTime(date);
 }
 
 void ReminderDialog::setContent(const QString &content) {

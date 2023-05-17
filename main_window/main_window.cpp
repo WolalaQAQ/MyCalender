@@ -1,18 +1,23 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 #include "reminder_dialog.h"
+#include "weather.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent),
         ui(new Ui::MainWindow) {
     ui->setupUi(this);
     loadReminders();
+    auto weather = new WeatherService();
+    weather->getWeatherData();
     // 添加日程提醒的QAction
     connect(ui->openReminderDialogAction, &QAction::triggered, this, &MainWindow::openReminderDialog);
     // 添加日程提醒的QTableWidget
     connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &MainWindow::showReminder);
     // 修改日程提醒的QListWidget
     connect(ui->reminderList, &QListWidget::itemDoubleClicked, this, &MainWindow::editReminder);
+    // 搜索日程提醒的QLineEdit
+    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &MainWindow::searchReminders);
     // 显示当前的时间
     auto currentDateTime = QDateTime::currentDateTime();
     QString currentTimeString = currentDateTime.toString("yyyy-MM-dd hh:mm:ss");
@@ -56,16 +61,11 @@ void MainWindow::monthComboxChanged(const QString& month) {
     refreshMainWindow(ui->yearCombox->currentText().toInt(), month.toInt());
 }
 
-void MainWindow::refreshMainWindow(int year, int month) {
-    updateCalender(year, month);
-    updateReminderList();
-}
-
 void MainWindow::openReminderDialog() {
     ReminderDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         Reminder reminder;
-        reminder.date = dialog.getDate();
+        reminder.dateTime = dialog.getDate();
         reminder.content = dialog.getContent();
         reminders.append(reminder);
         refreshMainWindow(currentYear_, currentMonth_);
@@ -80,7 +80,7 @@ void MainWindow::showReminder(int row, int column) {
     // 创建一个列表来存储当日的所有日程
     QStringList reminderList;
     for (const Reminder &reminder : reminders) {
-        if (reminder.date == date) {
+        if (reminder.dateTime.date() == date) {
             reminderList.append(reminder.content);
         }
     }
@@ -94,14 +94,28 @@ void MainWindow::editReminder(QListWidgetItem *item) {
     int index = ui->reminderList->row(item);
     Reminder &reminder = reminders[index];
     ReminderDialog dialog(this);
-    dialog.setDate(reminder.date);
+    dialog.setDate(reminder.dateTime);
     dialog.setContent(reminder.content);
     if (dialog.exec() == QDialog::Accepted) {
-        reminder.date = dialog.getDate();
+        reminder.dateTime = dialog.getDate();
         reminder.content = dialog.getContent();
         refreshMainWindow(currentYear_, currentMonth_);
         saveReminders();
     }
+}
+
+void MainWindow::searchReminders(const QString &keyword) {
+    ui->reminderList->clear();
+    for (const Reminder &reminder : reminders) {
+        if (reminder.content.contains(keyword, Qt::CaseInsensitive)) {
+            ui->reminderList->addItem(reminder.dateTime.toString("yyyy-MM-dd-hh:mm") + " : " + reminder.content);
+        }
+    }
+}
+
+void MainWindow::refreshMainWindow(int year, int month) {
+    updateCalender(year, month);
+    updateReminderList();
 }
 
 void MainWindow::updateCalender(int year, int month) {
@@ -131,7 +145,7 @@ void MainWindow::updateCalender(int year, int month) {
         // 检查该日期是否有日程
         QDate date(year, month, day);
         for (const Reminder &reminder : reminders) {
-            if (reminder.date == date) {
+            if (reminder.dateTime.date() == date) {
                 // 如果有日程，将单元格的背景色设置为不同的颜色
                 item->setBackground(Qt::darkCyan);
                 break;
@@ -169,7 +183,7 @@ void MainWindow::updateCalender(int year, int month) {
 void MainWindow::updateReminderList() {
     ui->reminderList->clear();
     for (const Reminder &reminder : reminders) {
-        ui->reminderList->addItem(reminder.date.toString("yyyy-MM-dd") + ": " + reminder.content);
+        ui->reminderList->addItem(reminder.dateTime.toString("yyyy-MM-dd-hh:mm") + " : " + reminder.content);
     }
 }
 
@@ -177,7 +191,7 @@ void MainWindow::saveReminders() {
     QJsonArray reminderArray;
     for (const Reminder &reminder : reminders) {
         QJsonObject reminderObject;
-        reminderObject["date"] = reminder.date.toString(Qt::ISODate);
+        reminderObject["dateTime"] = reminder.dateTime.toString(Qt::ISODate);
         reminderObject["content"] = reminder.content;
         reminderArray.append(reminderObject);
     }
@@ -206,10 +220,8 @@ void MainWindow::loadReminders() {
     for (auto && i : reminderArray) {
         QJsonObject reminderObject = i.toObject();
         Reminder reminder;
-        reminder.date = QDate::fromString(reminderObject["date"].toString(), Qt::ISODate);
+        reminder.dateTime = QDateTime::fromString(reminderObject["dateTime"].toString(), Qt::ISODate);
         reminder.content = reminderObject["content"].toString();
         reminders.append(reminder);
     }
 }
-
-

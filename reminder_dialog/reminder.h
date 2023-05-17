@@ -10,7 +10,7 @@
 
 class Reminder {
 public:
-    QDate date;
+    QDateTime dateTime;
     QString content;
 };
 

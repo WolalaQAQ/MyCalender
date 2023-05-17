@@ -20,10 +20,10 @@ public:
     explicit ReminderDialog(QWidget *parent = nullptr);
     ~ReminderDialog() override;
 
-    [[nodiscard]] QDate getDate() const;
+    [[nodiscard]] QDateTime getDate() const;
     [[nodiscard]] QString getContent() const;
 
-    void setDate(const QDate &date);
+    void setDate(const QDateTime &date);
     void setContent(const QString &content);
 
 private:
