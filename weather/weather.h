@@ -12,16 +12,21 @@ class WeatherService : public QObject {
 Q_OBJECT
 public:
     explicit WeatherService(QObject *parent = nullptr);
-    void getWeatherData();
 
 signals:
-    void weatherUpdated(const QString &temp, const QString &text);
+    void weatherUpdated(const QString &icon, const QString &temp, const QString &text);
 
 private slots:
     void onWeatherDataReceived(QNetworkReply *reply);
+    void onLocationDataReceived(QNetworkReply *reply);
+    void sendWeatherRequest(double longitude, double latitude);
 
 private:
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager *location_manager;
+    QNetworkAccessManager *weather_manager;
+    void getWeatherData();
+    void getLocationFromAmap();
+
 };
 
 #endif //MYCALENDER_WEATHER_H

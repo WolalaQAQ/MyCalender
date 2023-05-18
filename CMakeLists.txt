@@ -12,8 +12,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Positioning Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Positioning Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg)
+
+find_package(ZLIB REQUIRED)
 
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 
@@ -28,6 +30,8 @@ aux_source_directory(./reminder_dialog REMINDER_SRCS)
 include_directories(./weather)
 add_subdirectory(weather)
 aux_source_directory(./weather WEATHER_SRCS)
+
+file(COPY ./weather/icons DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 set(PROJECT_SOURCES
         main.cpp
@@ -64,8 +68,9 @@ target_link_libraries(MyCalender
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Widgets
-        Qt${QT_VERSION_MAJOR}::Positioning
         Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Svg
+        ZLIB::ZLIB
         )
 
 set_target_properties(MyCalender PROPERTIES

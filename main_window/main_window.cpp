@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     loadReminders();
     auto weather = new WeatherService();
-    weather->getWeatherData();
     // 添加日程提醒的QAction
     connect(ui->openReminderDialogAction, &QAction::triggered, this, &MainWindow::openReminderDialog);
     // 添加日程提醒的QTableWidget
@@ -18,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->reminderList, &QListWidget::itemDoubleClicked, this, &MainWindow::editReminder);
     // 搜索日程提醒的QLineEdit
     connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &MainWindow::searchReminders);
+    // 获取到天气的信号
+    connect(weather, &WeatherService::weatherUpdated, this, &MainWindow::updateWeather);
     // 显示当前的时间
     auto currentDateTime = QDateTime::currentDateTime();
     QString currentTimeString = currentDateTime.toString("yyyy-MM-dd hh:mm:ss");
@@ -111,6 +112,15 @@ void MainWindow::searchReminders(const QString &keyword) {
             ui->reminderList->addItem(reminder.dateTime.toString("yyyy-MM-dd-hh:mm") + " : " + reminder.content);
         }
     }
+}
+
+void MainWindow::updateWeather(const QString &icon, const QString &temp, const QString &text) {
+    auto scene = new QGraphicsScene();
+    ui->weatherIconView->setScene(scene);
+    auto svgItem = new QGraphicsSvgItem("./icons/" + icon + "-fill.svg");
+    scene->addItem(svgItem);
+    ui->weatherIconView->fitInView(svgItem);
+    ui->weatherInfo->setText(temp + " ℃" + " " + text);
 }
 
 void MainWindow::refreshMainWindow(int year, int month) {
