@@ -2,6 +2,7 @@
 #define CALENDERDIALOG_H
 
 #include <QMainWindow>
+#include <QKeyEvent>
 #include <QDialog>
 #include <QDate>
 #include <QTimer>
@@ -13,6 +14,8 @@
 #include <QJsonArray>
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
+#include <QGraphicsView>
+#include <QTreeWidgetItem>
 
 #include "reminder.h"
 
@@ -28,26 +31,30 @@ public:
     ~MainWindow() override;
 
 private:
+    void refreshMainWindow(int year, int month);
+    void updateCalender(int year, int month);
+    void updateReminderTree();
+    void saveReminders();
+    void loadReminders();
+    void keyPressEvent(QKeyEvent *event) override;
+
     Ui::MainWindow *ui;
     QList<Reminder> reminders;
     int currentYear_ = QDate::currentDate().year();
     int currentMonth_ = QDate::currentDate().month();
 
 public slots:
+
+private slots:
     void yearComboxChanged(const QString& year);
     void monthComboxChanged(const QString& month);
     void openReminderDialog();
     void showReminder(int row, int column);
-    void editReminder(QListWidgetItem *item);
-    void searchReminders(const QString &keyword);
+    void editReminder(QTreeWidgetItem *item);
+    void deleteReminder();
+    void handleSearchInputChanged();
+    void searchReminders(const QString &keyword, const QDateTime &dateTime);
     void updateWeather(const QString &icon, const QString &temp, const QString &text);
-
-private:
-    void refreshMainWindow(int year, int month);
-    void updateCalender(int year, int month);
-    void updateReminderList();
-    void saveReminders();
-    void loadReminders();
 
 };
 

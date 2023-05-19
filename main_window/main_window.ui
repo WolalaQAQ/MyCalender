@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
+    <width>646</width>
     <height>397</height>
    </rect>
   </property>
@@ -49,6 +49,83 @@
     <property name="editTriggers">
      <set>QAbstractItemView::NoEditTriggers</set>
     </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderStretchLastSection">
+     <bool>false</bool>
+    </attribute>
+    <row>
+     <property name="text">
+      <string>行1</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>行2</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>行3</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>行4</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>行5</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>行6</string>
+     </property>
+    </row>
+    <column>
+     <property name="text">
+      <string>星期一</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期二</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期三</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期四</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期五</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期六</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>星期日</string>
+     </property>
+    </column>
    </widget>
    <widget class="QLabel" name="currentTime">
     <property name="geometry">
@@ -103,7 +180,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListWidget" name="reminderList">
+   <widget class="QTreeWidget" name="reminderTree">
     <property name="geometry">
      <rect>
       <x>395</x>
@@ -112,6 +189,31 @@
       <height>251</height>
      </rect>
     </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
+    <property name="sortingEnabled">
+     <bool>true</bool>
+    </property>
+    <attribute name="headerDefaultSectionSize">
+     <number>135</number>
+    </attribute>
+    <attribute name="headerShowSortIndicator" stdset="0">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="headerStretchLastSection">
+     <bool>true</bool>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>日期</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>内容</string>
+     </property>
+    </column>
    </widget>
    <widget class="QLabel" name="reminderListLabel">
     <property name="geometry">
@@ -129,8 +231,8 @@
    <widget class="QLineEdit" name="searchLineEdit">
     <property name="geometry">
      <rect>
-      <x>462</x>
-      <y>20</y>
+      <x>460</x>
+      <y>50</y>
       <width>181</width>
       <height>32</height>
      </rect>
@@ -196,13 +298,23 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QDateTimeEdit" name="searchDateTimeEdit">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>10</y>
+      <width>181</width>
+      <height>32</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>645</width>
+     <width>646</width>
      <height>32</height>
     </rect>
    </property>

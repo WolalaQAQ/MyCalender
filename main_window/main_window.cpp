@@ -8,21 +8,26 @@ MainWindow::MainWindow(QWidget *parent)
         ui(new Ui::MainWindow) {
     ui->setupUi(this);
     loadReminders();
+    setFocusPolicy(Qt::StrongFocus);
     auto weather = new WeatherService();
     // 添加日程提醒的QAction
     connect(ui->openReminderDialogAction, &QAction::triggered, this, &MainWindow::openReminderDialog);
     // 添加日程提醒的QTableWidget
-    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &MainWindow::showReminder);
+    connect(ui->tableWidget, &QTableWidget::cellClicked, this, &MainWindow::showReminder);
     // 修改日程提醒的QListWidget
-    connect(ui->reminderList, &QListWidget::itemDoubleClicked, this, &MainWindow::editReminder);
+    connect(ui->reminderTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::editReminder);
     // 搜索日程提醒的QLineEdit
-    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &MainWindow::searchReminders);
+    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &MainWindow::handleSearchInputChanged);
+    // 搜索日程提醒的QDateTimeEdit
+    connect(ui->searchDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::handleSearchInputChanged);
     // 获取到天气的信号
     connect(weather, &WeatherService::weatherUpdated, this, &MainWindow::updateWeather);
     // 显示当前的时间
     auto currentDateTime = QDateTime::currentDateTime();
     QString currentTimeString = currentDateTime.toString("yyyy-MM-dd hh:mm:ss");
     ui->currentTime->setText(currentTimeString);
+    // 将搜索日程提醒的QDateTimeEdit设置为当前时间
+    ui->searchDateTimeEdit->setDateTime(currentDateTime);
     // 创建定时器
     auto *timer = new QTimer();
     // 每秒更新一次时间
@@ -44,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->monthCombox->setCurrentText(QString::number(currentMonth_));
 
-    connect(ui->yearCombox, SIGNAL(currentTextChanged(QString)), this, SLOT(yearComboxChanged(QString)));
-    connect(ui->monthCombox, SIGNAL(currentTextChanged(QString)), this, SLOT(monthComboxChanged(QString)));
+    connect(ui->yearCombox, &QComboBox::currentTextChanged, this, &MainWindow::yearComboxChanged);
+    connect(ui->monthCombox, &QComboBox::currentTextChanged, this, &MainWindow::monthComboxChanged);
 
     refreshMainWindow(currentYear_, currentMonth_);
 }
@@ -75,24 +80,19 @@ void MainWindow::openReminderDialog() {
 }
 
 void MainWindow::showReminder(int row, int column) {
+    if(ui->tableWidget->item(row, column) == nullptr) {
+        return;
+    }
     QDate date(ui->yearCombox->currentText().toInt(),
                ui->monthCombox->currentText().toInt(),
                ui->tableWidget->item(row, column)->text().toInt());
-    // 创建一个列表来存储当日的所有日程
-    QStringList reminderList;
-    for (const Reminder &reminder : reminders) {
-        if (reminder.dateTime.date() == date) {
-            reminderList.append(reminder.content);
-        }
-    }
-    // 如果有日程，显示一个消息框列出所有日程
-    if (!reminderList.isEmpty()) {
-        QMessageBox::information(this, tr("Reminders"), reminderList.join("\n"));
-    }
+    QTime time(0, 0, 0);
+    QDateTime dateTime(date, time);
+    ui->searchDateTimeEdit->setDateTime(dateTime);
 }
 
-void MainWindow::editReminder(QListWidgetItem *item) {
-    int index = ui->reminderList->row(item);
+void MainWindow::editReminder(QTreeWidgetItem *item) {
+    int index = ui->reminderTree->indexOfTopLevelItem(item);
     Reminder &reminder = reminders[index];
     ReminderDialog dialog(this);
     dialog.setDate(reminder.dateTime);
@@ -105,11 +105,40 @@ void MainWindow::editReminder(QListWidgetItem *item) {
     }
 }
 
-void MainWindow::searchReminders(const QString &keyword) {
-    ui->reminderList->clear();
+void MainWindow::deleteReminder() {
+    auto selectedItems = ui->reminderTree->selectedItems();
+    qDebug() << "Selected Items Size : " << selectedItems.size();
+    if (selectedItems.empty()) {
+        return;
+    }
+    QList<int> indexesToDelete;
+    for (auto& selectedItem : selectedItems) {
+        int index = ui->reminderTree->indexOfTopLevelItem(selectedItem);
+        indexesToDelete.prepend(index);
+    }
+    for (auto index : indexesToDelete) {
+        reminders.removeAt(index);
+    }
+    refreshMainWindow(currentYear_, currentMonth_);
+    saveReminders();
+}
+
+void MainWindow::handleSearchInputChanged() {
+    if(ui->searchLineEdit) {
+        searchReminders(ui->searchLineEdit->text(), ui->searchDateTimeEdit->dateTime());
+    }
+    else if(ui->searchDateTimeEdit) {
+        searchReminders(ui->searchLineEdit->text(), ui->searchDateTimeEdit->dateTime());
+    }
+}
+
+void MainWindow::searchReminders(const QString &keyword, const QDateTime &dateTime) {
+    ui->reminderTree->clear();
     for (const Reminder &reminder : reminders) {
-        if (reminder.content.contains(keyword, Qt::CaseInsensitive)) {
-            ui->reminderList->addItem(reminder.dateTime.toString("yyyy-MM-dd-hh:mm") + " : " + reminder.content);
+        if ( reminder.content.contains(keyword, Qt::CaseInsensitive) && reminder.dateTime.date().day() == dateTime.date().day() ) {
+            auto item = new QTreeWidgetItem(ui->reminderTree);
+            item->setText(0, reminder.dateTime.toString("yyyy-MM-dd hh:mm"));
+            item->setText(1, reminder.content);
         }
     }
 }
@@ -125,20 +154,12 @@ void MainWindow::updateWeather(const QString &icon, const QString &temp, const Q
 
 void MainWindow::refreshMainWindow(int year, int month) {
     updateCalender(year, month);
-    updateReminderList();
+    updateReminderTree();
 }
 
 void MainWindow::updateCalender(int year, int month) {
-    // 设置行、列数量
-    ui->tableWidget->setRowCount(6);
-    ui->tableWidget->setColumnCount(7);
+    // 清空表格
     ui->tableWidget->clearContents();
-    // 添加星期标题行
-    QStringList headerLabels;
-    headerLabels << tr("星期一") << tr("星期二")
-                 << tr("星期三") << tr("星期四") << tr("星期五")
-                 << tr("星期六") << tr("星期日");
-    ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
     // 获取当前月份的第一天
     QDate firstDayOfMonth(year, month, 1);
     // 获取当前月份的最后一天
@@ -187,14 +208,17 @@ void MainWindow::updateCalender(int year, int month) {
     ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     // 设置表格边距和间距为0
     ui->tableWidget->setContentsMargins(0, 0, 0, 0);
-    ui->tableWidget->verticalHeader()->setVisible(false);
 }
 
-void MainWindow::updateReminderList() {
-    ui->reminderList->clear();
+void MainWindow::updateReminderTree() {
+    ui->reminderTree->clear();
     for (const Reminder &reminder : reminders) {
-        ui->reminderList->addItem(reminder.dateTime.toString("yyyy-MM-dd-hh:mm") + " : " + reminder.content);
+        auto item = new QTreeWidgetItem(ui->reminderTree);
+        item->setText(0, reminder.dateTime.toString("yyyy-MM-dd hh:mm"));
+        item->setText(1, reminder.content);
     }
+    ui->reminderTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->reminderTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 }
 
 void MainWindow::saveReminders() {
@@ -233,5 +257,11 @@ void MainWindow::loadReminders() {
         reminder.dateTime = QDateTime::fromString(reminderObject["dateTime"].toString(), Qt::ISODate);
         reminder.content = reminderObject["content"].toString();
         reminders.append(reminder);
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if(event->key() == Qt::Key_Delete) {
+        deleteReminder();
     }
 }

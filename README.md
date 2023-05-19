@@ -10,6 +10,7 @@ C++课程设计，设计了一个精美的CPP+Qt日历，非常先进。
 ```bash 
 git clone https://github.com/WolalaQAQ/MyCalender.git
 cd MyCalender
+mkdir build && cd build
 cmake ..
 make
 ```
@@ -22,8 +23,7 @@ make
 - [和风天气开源图标字体库](https://icons.qweather.com/)
 
 ## TODO
-- [ ] 日程排序
-- [ ] 按照日程时间搜索
-- [ ] 日程显示可能溢出
-- [ ] 删除日程
-- [ ] 日程归档
+- [x] 日程排序
+- [x] 按照日程时间搜索
+- [x] 日程显示可能溢出
+- [x] 删除日程
