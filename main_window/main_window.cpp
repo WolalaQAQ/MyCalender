@@ -2,6 +2,7 @@
 #include "ui_main_window.h"
 #include "reminder_dialog.h"
 #include "weather.h"
+#include "login_dialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent),
@@ -22,6 +23,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->searchDateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::handleSearchInputChanged);
     // 获取到天气的信号
     connect(weather, &WeatherService::weatherUpdated, this, &MainWindow::updateWeather);
+    // 登录的QAction
+    connect(ui->loginAction, &QAction::triggered, [this]() {
+        openLoginDialog(0);
+    });
+    // 注册的QAction
+    connect(ui->registerAction, &QAction::triggered, [this]() {
+        openLoginDialog(1);
+    });
+    // 登出的QAction
+    connect(ui->signoutAction, &QAction::triggered, this, &MainWindow::signOut);
     // 显示当前的时间
     auto currentDateTime = QDateTime::currentDateTime();
     QString currentTimeString = currentDateTime.toString("yyyy-MM-dd hh:mm:ss");
@@ -29,17 +40,18 @@ MainWindow::MainWindow(QWidget *parent)
     // 将搜索日程提醒的QDateTimeEdit设置为当前时间
     ui->searchDateTimeEdit->setDateTime(currentDateTime);
     // 创建定时器
-    auto *timer = new QTimer();
+    auto timer = new QTimer();
     // 每秒更新一次时间
     QObject::connect(timer, &QTimer::timeout, [&]() {
         QDateTime currentDateTime = QDateTime::currentDateTime();
         QString currentTimeString = currentDateTime.toString("yyyy-MM-dd hh:mm:ss");
         ui->currentTime->setText(currentTimeString);
+        updateUserStatusBar();
     });
     // 启动定时器
     timer->start(1000);
     // 设置年份范围为当前时间的前 100 年至当前时间的后 10 年
-    for (int year = currentYear_ - 2022; year <= currentYear_ + 10000-2023; year++) {
+    for (int year = 1; year <= 10000; ++year) {
         ui->yearCombox->addItem(QString::number(year));
     }
     ui->yearCombox->setCurrentText(QString::number(currentYear_));
@@ -68,11 +80,16 @@ void MainWindow::monthComboxChanged(const QString& month) {
 }
 
 void MainWindow::openReminderDialog() {
+    if(currentUsername_.isEmpty()) {
+        QMessageBox::warning(this, "Warning", "请先登录");
+        return;
+    }
     ReminderDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         Reminder reminder;
         reminder.dateTime = dialog.getDate();
         reminder.content = dialog.getContent();
+        reminder.username = currentUsername_;
         reminders.append(reminder);
         refreshMainWindow(currentYear_, currentMonth_);
         saveReminders();
@@ -92,6 +109,10 @@ void MainWindow::showReminder(int row, int column) {
 }
 
 void MainWindow::editReminder(QTreeWidgetItem *item) {
+    if(currentUsername_.isEmpty()) {
+        QMessageBox::warning(this, "Warning", "请先登录");
+        return;
+    }
     int index = ui->reminderTree->indexOfTopLevelItem(item);
     Reminder &reminder = reminders[index];
     ReminderDialog dialog(this);
@@ -134,8 +155,10 @@ void MainWindow::handleSearchInputChanged() {
 
 void MainWindow::searchReminders(const QString &keyword, const QDateTime &dateTime) {
     ui->reminderTree->clear();
-    for (const Reminder &reminder : reminders) {
-        if ( reminder.content.contains(keyword, Qt::CaseInsensitive) && reminder.dateTime.date().day() == dateTime.date().day() ) {
+    for (const auto &reminder : reminders) {
+        if ( reminder.content.contains(keyword, Qt::CaseInsensitive)
+        && reminder.dateTime.date().day() == dateTime.date().day()
+        && reminder.username == currentUsername_) {
             auto item = new QTreeWidgetItem(ui->reminderTree);
             item->setText(0, reminder.dateTime.toString("yyyy-MM-dd hh:mm"));
             item->setText(1, reminder.content);
@@ -154,7 +177,65 @@ void MainWindow::updateWeather(const QString &icon, const QString &temp, const Q
 
 void MainWindow::refreshMainWindow(int year, int month) {
     updateCalender(year, month);
+    updateUserStatusBar();
     updateReminderTree();
+}
+
+void MainWindow::openLoginDialog(uint8_t isRegister) {
+    if(!currentUsername_.isEmpty()) {
+        QMessageBox::warning(this, "Warning", "请先退出当前账号！");
+        return;
+    }
+    LoginDialog dialog(this);
+    loadUsers();
+    if (dialog.exec() == QDialog::Accepted) {
+        User user;
+        user.username = dialog.getUsername();
+        user.password = dialog.getPassword();
+        if(user.username.isEmpty() && user.username.isEmpty()) {
+            QMessageBox::warning(this, "Warning", "用户名或密码不能为空！");
+            return;
+        }
+        switch (isRegister) {
+            case 0:
+                for(const auto& u : users) {
+                    if(u.username == user.username && u.password == user.password) {
+                        QMessageBox::information(this, "Information", "登录成功！");
+                        currentUsername_ = user.username;
+                        refreshMainWindow(currentYear_, currentMonth_);
+                        return;
+                    }
+                }
+                QMessageBox::warning(this, "Warning", "用户名或密码错误！");
+                break;
+            case 1:
+                for(const auto& u : users) {
+                    if(u.username == user.username) {
+                        QMessageBox::warning(this, "Warning", "用户名已存在！");
+                        return;
+                    }
+                    else if(u.username.contains(" ")) {
+                        QMessageBox::warning(this, "Warning", "用户名不能包含空格！");
+                        return;
+                    }
+                }
+                users.append(user);
+                saveUsers();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void MainWindow::signOut() {
+    if(currentUsername_.isEmpty()) {
+        QMessageBox::warning(this, "Warning", "请先登录！");
+        return;
+    }
+    currentUsername_.clear();
+    QMessageBox::information(this, "Information", "退出成功！");
+    refreshMainWindow(currentYear_, currentMonth_);
 }
 
 void MainWindow::updateCalender(int year, int month) {
@@ -172,11 +253,11 @@ void MainWindow::updateCalender(int year, int month) {
         int row = (firstDayOfWeek + day - 1) / 7; // 计算行号
         int column = (firstDayOfWeek + day - 1) % 7; // 计算列号
 
-        auto *item = new QTableWidgetItem(QString::number(day));
+        auto item = new QTableWidgetItem(QString::number(day));
         // 检查该日期是否有日程
         QDate date(year, month, day);
-        for (const Reminder &reminder : reminders) {
-            if (reminder.dateTime.date() == date) {
+        for (const auto &reminder : reminders) {
+            if (reminder.dateTime.date() == date && reminder.username == currentUsername_) {
                 // 如果有日程，将单元格的背景色设置为不同的颜色
                 item->setBackground(Qt::darkCyan);
                 break;
@@ -196,7 +277,7 @@ void MainWindow::updateCalender(int year, int month) {
     // 设置单元格文本居中对齐
     for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
         for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
-            QTableWidgetItem *item = ui->tableWidget->item(row, col);
+            auto item = ui->tableWidget->item(row, col);
             if (item) {
                 item->setTextAlignment(Qt::AlignCenter);
             }
@@ -210,9 +291,20 @@ void MainWindow::updateCalender(int year, int month) {
     ui->tableWidget->setContentsMargins(0, 0, 0, 0);
 }
 
+void MainWindow::updateUserStatusBar() {
+    if(currentUsername_.isEmpty()) {
+        ui->statusbar->showMessage("未登录");
+    } else {
+        ui->statusbar->showMessage("当前用户：" + currentUsername_);
+    }
+}
+
 void MainWindow::updateReminderTree() {
     ui->reminderTree->clear();
-    for (const Reminder &reminder : reminders) {
+    for (const auto &reminder : reminders) {
+        if(reminder.username != currentUsername_) {
+            continue;
+        }
         auto item = new QTreeWidgetItem(ui->reminderTree);
         item->setText(0, reminder.dateTime.toString("yyyy-MM-dd hh:mm"));
         item->setText(1, reminder.content);
@@ -222,42 +314,94 @@ void MainWindow::updateReminderTree() {
 }
 
 void MainWindow::saveReminders() {
-    QJsonArray reminderArray;
-    for (const Reminder &reminder : reminders) {
-        QJsonObject reminderObject;
-        reminderObject["dateTime"] = reminder.dateTime.toString(Qt::ISODate);
-        reminderObject["content"] = reminder.content;
-        reminderArray.append(reminderObject);
-    }
-    QJsonObject jsonObject;
-    jsonObject["reminders"] = reminderArray;
-    QJsonDocument jsonDocument(jsonObject);
-    QFile file("reminders.json");
-    if (!file.open(QIODevice::WriteOnly)) {
+    // 使用SQLite数据库
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("reminders.db");
+    if (!db.open()) {
         qWarning("Couldn't open save file.");
         return;
     }
-    file.write(jsonDocument.toJson());
+    QSqlQuery query;
+    query.exec("DROP TABLE reminders");
+    query.exec("CREATE TABLE reminders ("
+               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+               "dateTime TEXT,"
+               "content TEXT,"
+               "username TEXT)");
+    for (const auto &reminder : reminders) {
+        query.prepare("INSERT INTO reminders (dateTime, content, username) "
+                      "VALUES (:dateTime, :content, :username)");
+        query.bindValue(":dateTime", reminder.dateTime.toString(Qt::ISODate));
+        query.bindValue(":content", reminder.content);
+        query.bindValue(":username", reminder.username);
+        query.exec();
+    }
+    db.close();
 }
 
 void MainWindow::loadReminders() {
-    QFile file("reminders.json");
-    if (!file.open(QIODevice::ReadOnly)) {
+    // 使用SQLite数据库
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("reminders.db");
+    if (!db.open()) {
         qWarning("Couldn't open save file. Creating a new one.");
         saveReminders();
         return;
     }
-    QByteArray saveData = file.readAll();
-    QJsonDocument jsonDocument(QJsonDocument::fromJson(saveData));
-    QJsonObject jsonObject = jsonDocument.object();
-    QJsonArray reminderArray = jsonObject["reminders"].toArray();
-    for (auto && i : reminderArray) {
-        QJsonObject reminderObject = i.toObject();
+    QSqlQuery query;
+    query.exec("SELECT * FROM reminders");
+    while (query.next()) {
         Reminder reminder;
-        reminder.dateTime = QDateTime::fromString(reminderObject["dateTime"].toString(), Qt::ISODate);
-        reminder.content = reminderObject["content"].toString();
+        reminder.dateTime = QDateTime::fromString(query.value("dateTime").toString(), Qt::ISODate);
+        reminder.content = query.value("content").toString();
+        reminder.username = query.value("username").toString();
         reminders.append(reminder);
     }
+    db.close();
+}
+
+void MainWindow::saveUsers() {
+    // 使用SQLite数据库
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("users.db");
+    if (!db.open()) {
+        qWarning("Couldn't open save file.");
+        return;
+    }
+    QSqlQuery query;
+    query.exec("DROP TABLE users");
+    query.exec("CREATE TABLE users ("
+               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+               "username TEXT,"
+               "password TEXT)");
+    for (const auto &user : users) {
+        query.prepare("INSERT INTO users (username, password) "
+                      "VALUES (:username, :password)");
+        query.bindValue(":username", user.username);
+        query.bindValue(":password", user.password);
+        query.exec();
+    }
+    db.close();
+}
+
+void MainWindow::loadUsers() {
+    // 使用SQLite数据库
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("users.db");
+    if (!db.open()) {
+        qWarning("Couldn't open save file. Creating a new one.");
+        saveUsers();
+        return;
+    }
+    QSqlQuery query;
+    query.exec("SELECT * FROM users");
+    while (query.next()) {
+        User user;
+        user.username = query.value("username").toString();
+        user.password = query.value("password").toString();
+        users.append(user);
+    }
+    db.close();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

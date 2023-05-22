@@ -12,8 +12,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
 
 find_package(ZLIB REQUIRED)
 
@@ -31,6 +31,10 @@ include_directories(./weather)
 add_subdirectory(weather)
 aux_source_directory(./weather WEATHER_SRCS)
 
+include_directories(./login_dialog)
+add_subdirectory(login_dialog)
+aux_source_directory(./login_dialog LOGIN_SRCS)
+
 file(COPY ./weather/icons DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 set(PROJECT_SOURCES
@@ -38,6 +42,7 @@ set(PROJECT_SOURCES
         ${MAIN_WINDOW_SRCS}
         ${REMINDER_SRCS}
         ${WEATHER_SRCS}
+        ${LOGIN_SRCS}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -70,6 +75,7 @@ target_link_libraries(MyCalender
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Svg
+        Qt${QT_VERSION_MAJOR}::Sql
         ZLIB::ZLIB
         )
 

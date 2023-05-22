@@ -307,6 +307,9 @@
       <height>32</height>
      </rect>
     </property>
+    <property name="displayFormat">
+     <string>yyyy/M/d hh:mm</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -318,18 +321,42 @@
      <height>32</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="reminderMenu">
     <property name="title">
      <string>日程</string>
     </property>
     <addaction name="openReminderDialogAction"/>
    </widget>
-   <addaction name="menu"/>
+   <widget class="QMenu" name="accountMenu">
+    <property name="title">
+     <string>账户</string>
+    </property>
+    <addaction name="loginAction"/>
+    <addaction name="registerAction"/>
+    <addaction name="signoutAction"/>
+   </widget>
+   <addaction name="accountMenu"/>
+   <addaction name="reminderMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="openReminderDialogAction">
    <property name="text">
     <string>添加日程</string>
+   </property>
+  </action>
+  <action name="loginAction">
+   <property name="text">
+    <string>登录</string>
+   </property>
+  </action>
+  <action name="registerAction">
+   <property name="text">
+    <string>注册</string>
+   </property>
+  </action>
+  <action name="signoutAction">
+   <property name="text">
+    <string>退出登录</string>
    </property>
   </action>
  </widget>

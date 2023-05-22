@@ -12,6 +12,7 @@ class Reminder {
 public:
     QDateTime dateTime;
     QString content;
+    QString username;
 };
 
 #endif //MYCALENDER_REMINDER_H
