@@ -14,4 +14,4 @@ public:
     bool isAdmin = false;
 };
 
-#endif //MYCALENDER_USER_H
+#endif//MYCALENDER_USER_H

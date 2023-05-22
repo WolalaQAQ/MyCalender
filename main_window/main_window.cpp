@@ -1,12 +1,12 @@
 #include "main_window.h"
-#include "ui_main_window.h"
-#include "reminder_dialog.h"
-#include "weather.h"
 #include "login_dialog.h"
+#include "reminder_dialog.h"
+#include "ui_main_window.h"
+#include "weather.h"
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent),
-        ui(new Ui::MainWindow) {
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow) {
     ui->setupUi(this);
     loadReminders();
     setFocusPolicy(Qt::StrongFocus);
@@ -71,16 +71,16 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::yearComboxChanged(const QString& year) {
+void MainWindow::yearComboxChanged(const QString &year) {
     refreshMainWindow(year.toInt(), ui->monthCombox->currentText().toInt());
 }
 
-void MainWindow::monthComboxChanged(const QString& month) {
+void MainWindow::monthComboxChanged(const QString &month) {
     refreshMainWindow(ui->yearCombox->currentText().toInt(), month.toInt());
 }
 
 void MainWindow::openReminderDialog() {
-    if(currentUsername_.isEmpty()) {
+    if (currentUsername_.isEmpty()) {
         QMessageBox::warning(this, "Warning", "请先登录");
         return;
     }
@@ -97,7 +97,7 @@ void MainWindow::openReminderDialog() {
 }
 
 void MainWindow::showReminder(int row, int column) {
-    if(ui->tableWidget->item(row, column) == nullptr) {
+    if (ui->tableWidget->item(row, column) == nullptr) {
         return;
     }
     QDate date(ui->yearCombox->currentText().toInt(),
@@ -109,7 +109,7 @@ void MainWindow::showReminder(int row, int column) {
 }
 
 void MainWindow::editReminder(QTreeWidgetItem *item) {
-    if(currentUsername_.isEmpty()) {
+    if (currentUsername_.isEmpty()) {
         QMessageBox::warning(this, "Warning", "请先登录");
         return;
     }
@@ -133,11 +133,11 @@ void MainWindow::deleteReminder() {
         return;
     }
     QList<int> indexesToDelete;
-    for (auto& selectedItem : selectedItems) {
+    for (auto &selectedItem: selectedItems) {
         int index = ui->reminderTree->indexOfTopLevelItem(selectedItem);
         indexesToDelete.prepend(index);
     }
-    for (auto index : indexesToDelete) {
+    for (auto index: indexesToDelete) {
         reminders.removeAt(index);
     }
     refreshMainWindow(currentYear_, currentMonth_);
@@ -145,20 +145,17 @@ void MainWindow::deleteReminder() {
 }
 
 void MainWindow::handleSearchInputChanged() {
-    if(ui->searchLineEdit) {
+    if (ui->searchLineEdit) {
         searchReminders(ui->searchLineEdit->text(), ui->searchDateTimeEdit->dateTime());
-    }
-    else if(ui->searchDateTimeEdit) {
+    } else if (ui->searchDateTimeEdit) {
         searchReminders(ui->searchLineEdit->text(), ui->searchDateTimeEdit->dateTime());
     }
 }
 
 void MainWindow::searchReminders(const QString &keyword, const QDateTime &dateTime) {
     ui->reminderTree->clear();
-    for (const auto &reminder : reminders) {
-        if ( reminder.content.contains(keyword, Qt::CaseInsensitive)
-        && reminder.dateTime.date().day() == dateTime.date().day()
-        && reminder.username == currentUsername_) {
+    for (const auto &reminder: reminders) {
+        if (reminder.content.contains(keyword, Qt::CaseInsensitive) && reminder.dateTime.date().day() == dateTime.date().day() && reminder.username == currentUsername_) {
             auto item = new QTreeWidgetItem(ui->reminderTree);
             item->setText(0, reminder.dateTime.toString("yyyy-MM-dd hh:mm"));
             item->setText(1, reminder.content);
@@ -182,7 +179,7 @@ void MainWindow::refreshMainWindow(int year, int month) {
 }
 
 void MainWindow::openLoginDialog(uint8_t isRegister) {
-    if(!currentUsername_.isEmpty()) {
+    if (!currentUsername_.isEmpty()) {
         QMessageBox::warning(this, "Warning", "请先退出当前账号！");
         return;
     }
@@ -192,14 +189,14 @@ void MainWindow::openLoginDialog(uint8_t isRegister) {
         User user;
         user.username = dialog.getUsername();
         user.password = dialog.getPassword();
-        if(user.username.isEmpty() && user.username.isEmpty()) {
+        if (user.username.isEmpty() && user.username.isEmpty()) {
             QMessageBox::warning(this, "Warning", "用户名或密码不能为空！");
             return;
         }
         switch (isRegister) {
             case 0:
-                for(const auto& u : users) {
-                    if(u.username == user.username && u.password == user.password) {
+                for (const auto &u: users) {
+                    if (u.username == user.username && u.password == user.password) {
                         QMessageBox::information(this, "Information", "登录成功！");
                         currentUsername_ = user.username;
                         refreshMainWindow(currentYear_, currentMonth_);
@@ -209,12 +206,11 @@ void MainWindow::openLoginDialog(uint8_t isRegister) {
                 QMessageBox::warning(this, "Warning", "用户名或密码错误！");
                 break;
             case 1:
-                for(const auto& u : users) {
-                    if(u.username == user.username) {
+                for (const auto &u: users) {
+                    if (u.username == user.username) {
                         QMessageBox::warning(this, "Warning", "用户名已存在！");
                         return;
-                    }
-                    else if(u.username.contains(" ")) {
+                    } else if (u.username.contains(" ")) {
                         QMessageBox::warning(this, "Warning", "用户名不能包含空格！");
                         return;
                     }
@@ -229,7 +225,7 @@ void MainWindow::openLoginDialog(uint8_t isRegister) {
 }
 
 void MainWindow::signOut() {
-    if(currentUsername_.isEmpty()) {
+    if (currentUsername_.isEmpty()) {
         QMessageBox::warning(this, "Warning", "请先登录！");
         return;
     }
@@ -250,13 +246,13 @@ void MainWindow::updateCalender(int year, int month) {
     int firstDayOfWeek = firstDayOfMonth.dayOfWeek() - 1;
     // 循环添加每一天的单元格
     for (int day = 1; day <= lastDayOfMonth.day(); ++day) {
-        int row = (firstDayOfWeek + day - 1) / 7; // 计算行号
-        int column = (firstDayOfWeek + day - 1) % 7; // 计算列号
+        int row = (firstDayOfWeek + day - 1) / 7;   // 计算行号
+        int column = (firstDayOfWeek + day - 1) % 7;// 计算列号
 
         auto item = new QTableWidgetItem(QString::number(day));
         // 检查该日期是否有日程
         QDate date(year, month, day);
-        for (const auto &reminder : reminders) {
+        for (const auto &reminder: reminders) {
             if (reminder.dateTime.date() == date && reminder.username == currentUsername_) {
                 // 如果有日程，将单元格的背景色设置为不同的颜色
                 item->setBackground(Qt::darkCyan);
@@ -292,7 +288,7 @@ void MainWindow::updateCalender(int year, int month) {
 }
 
 void MainWindow::updateUserStatusBar() {
-    if(currentUsername_.isEmpty()) {
+    if (currentUsername_.isEmpty()) {
         ui->statusbar->showMessage("未登录");
     } else {
         ui->statusbar->showMessage("当前用户：" + currentUsername_);
@@ -301,8 +297,8 @@ void MainWindow::updateUserStatusBar() {
 
 void MainWindow::updateReminderTree() {
     ui->reminderTree->clear();
-    for (const auto &reminder : reminders) {
-        if(reminder.username != currentUsername_) {
+    for (const auto &reminder: reminders) {
+        if (reminder.username != currentUsername_) {
             continue;
         }
         auto item = new QTreeWidgetItem(ui->reminderTree);
@@ -328,7 +324,7 @@ void MainWindow::saveReminders() {
                "dateTime TEXT,"
                "content TEXT,"
                "username TEXT)");
-    for (const auto &reminder : reminders) {
+    for (const auto &reminder: reminders) {
         query.prepare("INSERT INTO reminders (dateTime, content, username) "
                       "VALUES (:dateTime, :content, :username)");
         query.bindValue(":dateTime", reminder.dateTime.toString(Qt::ISODate));
@@ -374,7 +370,7 @@ void MainWindow::saveUsers() {
                "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                "username TEXT,"
                "password TEXT)");
-    for (const auto &user : users) {
+    for (const auto &user: users) {
         query.prepare("INSERT INTO users (username, password) "
                       "VALUES (:username, :password)");
         query.bindValue(":username", user.username);
@@ -405,7 +401,7 @@ void MainWindow::loadUsers() {
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Delete) {
+    if (event->key() == Qt::Key_Delete) {
         deleteReminder();
     }
 }

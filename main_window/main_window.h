@@ -1,32 +1,34 @@
 #ifndef CALENDERDIALOG_H
 #define CALENDERDIALOG_H
 
-#include <QMainWindow>
-#include <QKeyEvent>
-#include <QDialog>
 #include <QDate>
-#include <QTimer>
-#include <QMessageBox>
-#include <QListWidgetItem>
+#include <QDialog>
 #include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QSvgRenderer>
 #include <QGraphicsSvgItem>
 #include <QGraphicsView>
-#include <QTreeWidgetItem>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QKeyEvent>
+#include <QListWidgetItem>
+#include <QMainWindow>
+#include <QMessageBox>
 #include <QSqlQuery>
+#include <QSvgRenderer>
+#include <QTimer>
+#include <QTreeWidgetItem>
 
 #include "reminder.h"
 #include "user.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+    class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -59,8 +61,8 @@ private:
 public slots:
 
 private slots:
-    void yearComboxChanged(const QString& year);
-    void monthComboxChanged(const QString& month);
+    void yearComboxChanged(const QString &year);
+    void monthComboxChanged(const QString &month);
 
     void openReminderDialog();
     void showReminder(int row, int column);
@@ -75,4 +77,4 @@ private slots:
     void signOut();
 };
 
-#endif // CALENDERDIALOG_H
+#endif// CALENDERDIALOG_H

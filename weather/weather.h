@@ -5,11 +5,11 @@
 #ifndef MYCALENDER_WEATHER_H
 #define MYCALENDER_WEATHER_H
 
-#include <QObject>
 #include <QNetworkAccessManager>
+#include <QObject>
 
 class WeatherService : public QObject {
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit WeatherService(QObject *parent = nullptr);
 
@@ -26,7 +26,6 @@ private:
     QNetworkAccessManager *weather_manager;
     void getWeatherData();
     void getLocationFromAmap();
-
 };
 
-#endif //MYCALENDER_WEATHER_H
+#endif//MYCALENDER_WEATHER_H

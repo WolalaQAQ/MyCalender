@@ -5,9 +5,8 @@
 #include "reminder_dialog.h"
 #include "ui_reminder_dialog.h"
 
-ReminderDialog::ReminderDialog(QWidget *parent) :
-        QDialog(parent),
-        ui(new Ui::ReminderDialog) {
+ReminderDialog::ReminderDialog(QWidget *parent) : QDialog(parent),
+                                                  ui(new Ui::ReminderDialog) {
     ui->setupUi(this);
     // 将初始时间设置当前时间
     auto currentDateTime = QDateTime::currentDateTime();

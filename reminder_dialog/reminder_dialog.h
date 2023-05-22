@@ -5,16 +5,17 @@
 #ifndef MYCALENDER_REMINDER_DIALOG_H
 #define MYCALENDER_REMINDER_DIALOG_H
 
-#include <QDialog>
 #include <QDate>
+#include <QDialog>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class ReminderDialog; }
+namespace Ui {
+    class ReminderDialog;
+}
 QT_END_NAMESPACE
 
-class ReminderDialog : public QDialog
-{
-Q_OBJECT
+class ReminderDialog : public QDialog {
+    Q_OBJECT
 
 public:
     explicit ReminderDialog(QWidget *parent = nullptr);
@@ -30,4 +31,4 @@ private:
     Ui::ReminderDialog *ui;
 };
 
-#endif //MYCALENDER_REMINDER_DIALOG_H
+#endif//MYCALENDER_REMINDER_DIALOG_H

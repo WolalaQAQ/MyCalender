@@ -15,4 +15,4 @@ public:
     QString username;
 };
 
-#endif //MYCALENDER_REMINDER_H
+#endif//MYCALENDER_REMINDER_H

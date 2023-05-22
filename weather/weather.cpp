@@ -4,16 +4,16 @@
 
 #include "weather.h"
 
-#include <iostream>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QUrl>
-#include <QUrlQuery>
 #include <QDebug>
 #include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QUrl>
+#include <QUrlQuery>
+#include <iostream>
 
 WeatherService::WeatherService(QObject *parent) : QObject(parent) {
     weather_manager = new QNetworkAccessManager(this);
