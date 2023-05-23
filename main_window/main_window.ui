@@ -360,6 +360,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resource/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

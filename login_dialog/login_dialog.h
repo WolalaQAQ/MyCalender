@@ -6,6 +6,7 @@
 #define MYCALENDER_LOGIN_DIALOG_H
 
 #include <QDialog>
+#include <QToolButton>
 
 #include "ui_login_dialog.h"
 
@@ -30,6 +31,11 @@ public:
 
 private:
     Ui::LoginDialog *ui;
+
+public slots:
+
+private slots:
+    void eyeChanged(bool checked);
 };
 
 #endif//MYCALENDER_LOGIN_DIALOG_H

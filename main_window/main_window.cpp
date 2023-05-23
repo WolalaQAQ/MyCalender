@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    loadUsers();
     loadReminders();
     setFocusPolicy(Qt::StrongFocus);
     auto weather = new WeatherService();
@@ -110,7 +111,7 @@ void MainWindow::showReminder(int row, int column) {
 
 void MainWindow::editReminder(QTreeWidgetItem *item) {
     if (currentUsername_.isEmpty()) {
-        QMessageBox::warning(this, "Warning", "请先登录");
+        QMessageBox::warning(this, "Warning", "请先登录!");
         return;
     }
     int index = ui->reminderTree->indexOfTopLevelItem(item);
@@ -166,7 +167,7 @@ void MainWindow::searchReminders(const QString &keyword, const QDateTime &dateTi
 void MainWindow::updateWeather(const QString &icon, const QString &temp, const QString &text) {
     auto scene = new QGraphicsScene();
     ui->weatherIconView->setScene(scene);
-    auto svgItem = new QGraphicsSvgItem("./icons/" + icon + "-fill.svg");
+    auto svgItem = new QGraphicsSvgItem(":/weather/weather_icons/" + icon + "-fill.svg");
     scene->addItem(svgItem);
     ui->weatherIconView->fitInView(svgItem);
     ui->weatherInfo->setText(temp + " ℃" + " " + text);
@@ -184,7 +185,6 @@ void MainWindow::openLoginDialog(uint8_t isRegister) {
         return;
     }
     LoginDialog dialog(this);
-    loadUsers();
     if (dialog.exec() == QDialog::Accepted) {
         User user;
         user.username = dialog.getUsername();
@@ -340,7 +340,7 @@ void MainWindow::loadReminders() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("reminders.db");
     if (!db.open()) {
-        qWarning("Couldn't open save file. Creating a new one.");
+        qWarning("Couldn't open saved reminders file. Creating a new one.");
         saveReminders();
         return;
     }
@@ -385,7 +385,7 @@ void MainWindow::loadUsers() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("users.db");
     if (!db.open()) {
-        qWarning("Couldn't open save file. Creating a new one.");
+        qWarning("Couldn't open save users file. Creating a new one.");
         saveUsers();
         return;
     }

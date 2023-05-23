@@ -35,7 +35,9 @@ include_directories(./login_dialog)
 add_subdirectory(login_dialog)
 aux_source_directory(./login_dialog LOGIN_SRCS)
 
-file(COPY ./weather/icons DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+#file(COPY ./resource DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+
+qt5_add_resources(QRC_WRAPPERS ./resource/resource.qrc)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -58,12 +60,14 @@ else ()
     if (ANDROID)
         add_library(MyCalender SHARED
                 ${PROJECT_SOURCES}
+                ${QRC_WRAPPERS}
                 )
         # Define properties for Android with Qt 5 after find_package() calls as:
         #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else ()
         add_executable(MyCalender
                 ${PROJECT_SOURCES}
+                ${QRC_WRAPPERS}
                 )
     endif ()
 endif ()
