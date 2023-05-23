@@ -3,6 +3,7 @@
 #include "reminder_dialog.h"
 #include "ui_main_window.h"
 #include "weather.h"
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -312,7 +313,12 @@ void MainWindow::updateReminderTree() {
 void MainWindow::saveReminders() {
     // 使用SQLite数据库
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("reminders.db");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("db")) {
+        dir.mkdir("db");
+    }
+    db.setDatabaseName("db/reminders.db");
     if (!db.open()) {
         qWarning("Couldn't open save file.");
         return;
@@ -338,7 +344,12 @@ void MainWindow::saveReminders() {
 void MainWindow::loadReminders() {
     // 使用SQLite数据库
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("reminders.db");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("db")) {
+        dir.mkdir("db");
+    }
+    db.setDatabaseName("db/reminders.db");
     if (!db.open()) {
         qWarning("Couldn't open saved reminders file. Creating a new one.");
         saveReminders();
@@ -359,7 +370,12 @@ void MainWindow::loadReminders() {
 void MainWindow::saveUsers() {
     // 使用SQLite数据库
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("users.db");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("db")) {
+        dir.mkdir("db");
+    }
+    db.setDatabaseName("db/users.db");
     if (!db.open()) {
         qWarning("Couldn't open save file.");
         return;
@@ -383,7 +399,12 @@ void MainWindow::saveUsers() {
 void MainWindow::loadUsers() {
     // 使用SQLite数据库
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("users.db");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("db")) {
+        dir.mkdir("db");
+    }
+    db.setDatabaseName("db/users.db");
     if (!db.open()) {
         qWarning("Couldn't open save users file. Creating a new one.");
         saveUsers();

@@ -15,8 +15,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
 
-find_package(ZLIB REQUIRED)
-
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 
 include_directories(main_window)
@@ -80,7 +78,6 @@ target_link_libraries(MyCalender
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Svg
         Qt${QT_VERSION_MAJOR}::Sql
-        ZLIB::ZLIB
         )
 
 set_target_properties(MyCalender PROPERTIES

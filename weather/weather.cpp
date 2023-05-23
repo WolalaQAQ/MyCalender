@@ -5,6 +5,7 @@
 #include "weather.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -54,7 +55,12 @@ void WeatherService::onLocationDataReceived(QNetworkReply *reply) {
     QByteArray data = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data);
     // 保存JSON数据
-    QFile file("location.json");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("weather")) {
+        dir.mkdir("weather");
+    }
+    QFile file("weather/location.json");
     file.open(QIODevice::WriteOnly);
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
@@ -130,7 +136,12 @@ void WeatherService::onWeatherDataReceived(QNetworkReply *reply) {
     QByteArray data = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data);
     // 保存JSON数据
-    QFile file("weather.json");
+    // 检测目录是否存在在，不存在则创建
+    QDir dir;
+    if (!dir.exists("weather")) {
+        dir.mkdir("weather");
+    }
+    QFile file("weather/weather.json");
     file.open(QIODevice::WriteOnly);
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
