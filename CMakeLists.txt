@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.5)
 project(MyCalender VERSION 0.1 LANGUAGES CXX)
 
 #用QtCreator时这个变量通常可以省略,如果需要指定就换成你的对应Qt目录
-set(CMAKE_PREFIX_PATH "/usr/lib/x86_64-linux-gnu/cmake/Qt/")
+if(UNIX)
+    set(CMAKE_PREFIX_PATH "/usr/lib/x86_64-linux-gnu/cmake/Qt/")
+endif ()
 #
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
