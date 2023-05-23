@@ -34,7 +34,7 @@ void WeatherService::getLocationFromAmap() {
     qDebug() << "Location Request: " << url;
     QNetworkRequest request(url);
     QNetworkReply *reply = location_manager->get(request);
-    QObject::connect(reply, &QNetworkReply::finished, [=, this]() {
+    QObject::connect(reply, &QNetworkReply::finished, [=] () {
         if (reply->error() == QNetworkReply::NoError) {
             onLocationDataReceived(reply);
             qDebug() << "Location Response";
@@ -117,7 +117,7 @@ void WeatherService::sendWeatherRequest(const double longitude, const double lat
     // 发送GET请求
     QNetworkReply *reply = weather_manager->get(request);
     // 连接请求完成信号
-    QObject::connect(reply, &QNetworkReply::finished, [=, this]() {
+    QObject::connect(reply, &QNetworkReply::finished, [=] () {
         if (reply->error() == QNetworkReply::NoError) {
             // 读取响应数据
             onWeatherDataReceived(reply);
