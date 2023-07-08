@@ -29,7 +29,7 @@ void WeatherService::getWeatherData() {
 void WeatherService::getLocationFromAmap() {
     QUrl url("https://restapi.amap.com/v3/ip");
     QUrlQuery query;
-    query.addQueryItem("key", "21885260af9f75a5f21ef5f59540973d");
+    query.addQueryItem("key", "");
     url.setQuery(query);
     qDebug() << "Location Request: " << url;
     QNetworkRequest request(url);
@@ -109,7 +109,7 @@ void WeatherService::sendWeatherRequest(const double longitude, const double lat
     // 保留小数点后两位
     query.addQueryItem("location",
                        QString::number(longitude, 'f', 2) + "," + QString::number(latitude, 'f', 2));
-    query.addQueryItem("key", "e95a587b7fb64668a7b36576f42a7cae");
+    query.addQueryItem("key", "");
     url.setQuery(query);
     qDebug() << "Weather Request: " << url;
     // 创建网络请求
