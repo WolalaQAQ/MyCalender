@@ -14,8 +14,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql SvgWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Network Svg Sql SvgWidgets)
 
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin/")
 
@@ -37,7 +37,7 @@ aux_source_directory(./login_dialog LOGIN_SRCS)
 
 #file(COPY ./resource DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
-qt5_add_resources(QRC_WRAPPERS ./resource/resource.qrc)
+qt_add_resources(QRC_WRAPPERS ./resource/resource.qrc)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -80,6 +80,7 @@ target_link_libraries(MyCalender
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Svg
         Qt${QT_VERSION_MAJOR}::Sql
+        Qt${QT_VERSION_MAJOR}::SvgWidgets
         )
 
 set_target_properties(MyCalender PROPERTIES
